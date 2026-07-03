@@ -1,143 +1,154 @@
-# 🍽️ FoodBot - Telegram Bot для аналізу їжі
+# MyFoodBot
 
-**FoodBot** - це інтелектуальний Telegram бот для аналізу їжі та підрахунку калорій з використанням Claude AI.
+MyFoodBot is a Telegram nutrition assistant that analyzes meal photos, estimates calories and macronutrients, tracks daily water intake, and manages paid subscription access.
 
-## ✨ Можливості
+The bot is built with Python, aiogram, SQLite, and Anthropic Claude vision models. It is designed as a small production Telegram service with environment-based configuration, subscription state, admin operations, and local operational scripts.
 
-- 📸 **Аналіз фото їжі** - автоматичне розпізнавання страв
-- 🔥 **Підрахунок калорій** - точні дані про енергетичну цінність
-- 🥩 **Макронутрієнти** - білки, жири, вуглеводи
-- 🤖 **Claude AI** - штучний інтелект для точного аналізу
-- 💧 **Відстеження води** - контроль споживання рідини
-- 📊 **Статистика** - детальна аналітика харчування
-- 💳 **Система підписок** - платний доступ до розширених функцій
+## Features
 
-## 🚀 Швидкий старт
+- Meal photo analysis with dish recognition, estimated weight, calories, protein, fat, and carbohydrates
+- Daily nutrition summary for the last 24 hours
+- Water tracking with quick add actions
+- Multi-language user-facing messages
+- Free trial usage limits and subscription checks
+- Admin commands for users, subscriptions, backups, cleanup, and usage statistics
+- SQLite persistence for users, subscriptions, and food analysis history
+- Optional payment integrations through Telegram Stars, CryptoBot, LiqPay, provider tokens, and manual wallet details
 
-### Вимоги
+## Tech Stack
+
 - Python 3.8+
-- Telegram Bot Token
-- Anthropic API Key (для Claude AI)
+- aiogram 3.x
+- Anthropic SDK
+- SQLite
+- python-dotenv
+- Pillow, OpenCV, NumPy
 
-### Встановлення
+## Repository Layout
 
-1. **Клонуйте репозиторій**
-```bash
-git clone https://github.com/your-username/foodbot.git
-cd foodbot
+```text
+.
+├── bot.py
+├── config.py
+├── food_analyzer.py
+├── simple_payment.py
+├── subscription_db.py
+├── subscription_cleanup.py
+├── translations.py
+├── user_manager.py
+├── migrate_subscriptions.py
+├── setup_cron.sh
+├── start_bot.sh
+└── requirements.txt
 ```
 
-2. **Створіть віртуальне середовище**
-```bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# або
-venv\Scripts\activate  # Windows
-```
+## Requirements
 
-3. **Встановіть залежності**
+- Python 3.8 or newer
+- Telegram bot token from BotFather
+- Anthropic API key with access to the configured Claude model
+- A server or workstation that can run a long-lived Python process
+
+## Installation
+
 ```bash
+git clone git@github.com:andriionopa/MyFoodBot.git
+cd MyFoodBot
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. **Налаштуйте конфігурацію**
+## Configuration
+
+Create a local `.env` file. Do not commit it.
+
 ```bash
-cp config.py.example config.py
-# Відредагуйте config.py з вашими ключами
+cp .env.example .env
 ```
 
-5. **Запустіть бота**
+Minimum required values:
+
+```env
+TELEGRAM_BOT_TOKEN=replace_with_telegram_bot_token
+ANTHROPIC_API_KEY=replace_with_anthropic_api_key
+```
+
+Optional values:
+
+```env
+CLAUDE_MODEL=claude-3-5-haiku-20241022
+CRYPTOBOT_API_TOKEN=replace_with_cryptobot_token
+USDT_TRC20_WALLET=replace_with_usdt_trc20_wallet
+BTC_WALLET=replace_with_btc_wallet
+ETH_WALLET=replace_with_eth_wallet
+LIQPAY_PUBLIC_KEY=replace_with_liqpay_public_key
+LIQPAY_PRIVATE_KEY=replace_with_liqpay_private_key
+PAYMENT_PROVIDER_TOKEN=replace_with_payment_provider_token
+```
+
+The application also contains runtime defaults in `config.py` for database location, trial limits, subscription duration, and payment feature flags.
+
+## Running Locally
+
 ```bash
+source venv/bin/activate
 python bot.py
 ```
 
-## ⚙️ Конфігурація
+The bot starts polling Telegram updates and creates local SQLite data files when needed.
 
-Створіть файл `config.py` з наступними змінними:
+## User Commands
 
-```python
-TELEGRAM_BOT_TOKEN = "your_telegram_bot_token"
-ANTHROPIC_API_KEY = "your_anthropic_api_key"
-```
+- `/start` opens the main menu
+- `/help` shows usage guidance
+- `/about` shows project information
+- `/language` changes interface language
+- `/status` shows subscription status
+- `/payment` opens payment instructions
+- `/stats` shows daily nutrition statistics
 
-## 📱 Команди бота
+Users can also send a food photo directly to receive a structured nutrition estimate.
 
-### Основні команди
-- `/start` - Почати роботу з ботом
-- `/help` - Довідка по використанню
-- `/about` - Інформація про бота
-- `/status` - Статус підписки
-- `/stats` - Ваша статистика за 24 години
-- `/mode` - Налаштування режиму аналізу
+## Admin Operations
 
-### Адміністративні команди
-- `/admin_users` - Список користувачів
-- `/admin_stats` - Загальна статистика
-- `/admin_subscribe <user_id> <months>` - Активувати підписку
-- `/admin_help` - Допомога для адміністраторів
+Admin commands are restricted by Telegram user ID in `bot.py`.
 
-## 🏗️ Архітектура
+- `/admin_help`
+- `/admin_users`
+- `/admin_user <user_id>`
+- `/admin_user_stats <user_id>`
+- `/admin_stats`
+- `/admin_subscribe <user_id> <months>`
+- `/admin_extend <user_id> <days>`
+- `/admin_revoke <user_id>`
+- `/admin_reset_trials <user_id>`
+- `/admin_add_trials <user_id> <count>`
+- `/admin_backup`
+- `/admin_cleanup`
+- `/cleanup_stats`
+- `/migrate_db`
 
-```
-foodbot/
-├── bot.py              # Основний файл бота
-├── config.py           # Конфігурація
-├── food_analyzer.py    # Аналіз їжі через Claude AI
-├── user_manager.py     # Управління користувачами
-├── subscription_db.py  # База даних підписок
-├── requirements.txt    # Залежності Python
-└── README.md          # Цей файл
-```
+For production use, move administrator IDs to environment configuration before sharing deployments between environments.
 
-## 🔧 Технології
+## Data Files
 
-- **Python 3.8+** - основна мова програмування
-- **aiogram 3.x** - фреймворк для Telegram ботів
-- **Anthropic Claude AI** - штучний інтелект для аналізу
-- **SQLite** - база даних для зберігання статистики
-- **asyncio** - асинхронне програмування
+Runtime files such as SQLite databases, logs, backups, and `.env` are ignored by Git. Keep backups encrypted or outside the repository if they contain user data.
 
-## 💰 Тарифи
+## Security Notes
 
-- 🎁 **2 безкоштовні спроби** для кожного користувача
-- 💳 **$2 на місяць** після використання спроб
-- ⏰ **30 днів** дії підписки
+- Never commit `.env`, database files, payment tokens, wallet secrets, or exported backups.
+- Rotate credentials immediately if they were ever committed or shared.
+- Keep the bot token, Anthropic API key, and payment provider credentials in environment variables.
+- Review Telegram and payment provider compliance requirements before enabling paid access.
 
-## 🤝 Розробка
+## Validation
 
-### Структура проекту
-- `bot.py` - основна логіка бота
-- `food_analyzer.py` - інтеграція з Claude AI
-- `user_manager.py` - управління користувачами та підписками
-- `subscription_db.py` - робота з базою даних
-
-### Додавання нових функцій
-1. Створіть нову гілку: `git checkout -b feature/new-feature`
-2. Внесіть зміни
-3. Створіть Pull Request
-
-## 📄 Ліцензія
-
-Цей проект розповсюджується під ліцензією MIT. Дивіться файл `LICENSE` для деталей.
-
-## 👨‍💻 Автор
-
-**Andrey Onop** - [@onopandrey](https://t.me/onopandrey)
-
-## 🆘 Підтримка
-
-Якщо у вас виникли питання або проблеми:
-- 📧 Напишіть в Telegram: [@onopandrey](https://t.me/onopandrey)
-- 🐛 Створіть Issue в цьому репозиторії
-
-## 🔄 Оновлення
-
-Для оновлення бота:
 ```bash
-git pull origin main
-pip install -r requirements.txt
+python3 -m py_compile *.py
+gitleaks detect --source . --no-banner
 ```
 
----
+## License
 
-⭐ **Якщо проект вам сподобався, поставте зірочку!**
+MIT. See `LICENSE`.
